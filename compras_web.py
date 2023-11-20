@@ -1,103 +1,159 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.edge.options import Options
 from time import sleep
 import mysql.connector
 import os
-from dotenv import load_dotenv
-load_dotenv()
+from flask import Flask, render_template, request, redirect
 
-class NotaFiscal:
-    def __init__(self):
-        self.options = Options()
-        self.options.page_load_strategy = 'normal'
-        self.options.add_argument("--blink-settings=imagesEnabled=false") # no images loaded
-        self.options.add_argument("--headless") # browser is invisible
-        self.lista_de_compras = []
-            
-    def gerar_lista_de_compras(self, url):
-        driver = webdriver.Edge(options=self.options)
-        driver.get(url)
-        sleep(2)
-        
-        item_xpath = '//tbody[@id="myTable"]/tr/td[1]/h7'
-        quantidade_xpath = '//tbody[@id="myTable"]/tr/td[2]'
-        valor_xpath = '//tbody[@id="myTable"]/tr/td[4]'
-        data_da_compra_xpath = '//div[@id="collapse4"]/table[3]/tbody/tr/td[4]'
-        supermercado_xpath = '//div[@id="formPrincipal:content-template-consulta"]/div[1]/table[1]/thead/tr[2]/th/h4/b'
-        
-        itens = driver.find_elements(By.XPATH, item_xpath)
-        quantidades = driver.find_elements(By.XPATH, quantidade_xpath)
-        valores = driver.find_elements(By.XPATH, valor_xpath)
-        supermercado = driver.find_element(By.XPATH, supermercado_xpath)
-        
-        driver.find_element(By.XPATH, '//div[@id="heading3"]/h4').click()
-        sleep(0.5)
-        data_da_compra = driver.find_element(By.XPATH, data_da_compra_xpath)
-        data_da_compra = data_da_compra.text[:10].split("/")
-        data_da_compra = ("/").join(reversed(data_da_compra))
-        
-        for item, quantidade, valor in zip(itens, quantidades, valores):
-            registro = (0, item.text.strip(), quantidade.text[20:].strip(), valor.text[18:].strip().replace(',','.'), supermercado.text.strip(), data_da_compra)
-            self.lista_de_compras.append(registro)
-            # como id é autoincrement, não é necessário se preocupar com o valor e preencher 'default' não foi aceito
-        
+# from dotenv import load_dotenv
+# load_dotenv()
 
-class BancoDeDados:
-    def __init__(self):
-        self.conexao = mysql.connector.connect(
-        host = os.getenv("host"),
-        user = os.getenv("user"),
-        password = os.getenv("password"),
-        database = os.getenv("database"))
-        self.cursor = self.conexao.cursor()
-       
+class Invoice:
+	def __init__(self):
+		self.options = Options()
+		self.options.page_load_strategy = 'normal'
+		self.options.add_argument("--blink-settings=imagesEnabled=false") # no images loaded
+		self.options.add_argument("--headless") # browser is invisible
+		self.shopping_list = []
+			
+	def create_shopping_list(self, url):
+		driver = webdriver.Edge(options=self.options)
+		driver.get(url)
+		sleep(2)
+		
+		item_xpath = '//tbody[@id="myTable"]/tr/td[1]/h7'
+		amount_xpath = '//tbody[@id="myTable"]/tr/td[2]'
+		price_xpath = '//tbody[@id="myTable"]/tr/td[4]'
+		shopping_date_xpath = '//div[@id="collapse4"]/table[3]/tbody/tr/td[4]'
+		supermarket_xpath = '//div[@id="formPrincipal:content-template-consulta"]/div[1]/table[1]/thead/tr[2]/th/h4/b'
+		
+		itens = driver.find_elements(By.XPATH, item_xpath)
+		amounts = driver.find_elements(By.XPATH, amount_xpath)
+		prices = driver.find_elements(By.XPATH, price_xpath)
+		supermarket = driver.find_element(By.XPATH, supermarket_xpath)
+		
+		driver.find_element(By.XPATH, '//div[@id="heading3"]/h4').click()
+		sleep(0.5)
+		shopping_date = driver.find_element(By.XPATH, shopping_date_xpath)
+		shopping_date = shopping_date.text[:10].split("/")
+		shopping_date = ("/").join(reversed(shopping_date))
+		
+		for item, amount, price in zip(itens, amounts, prices):
+			registro = (0, item.text.strip(), amount.text[20:].strip(), price.text[18:].strip().replace(',','.'), supermarket.text.strip(), shopping_date)
+			self.shopping_list.append(registro)
+			# como id é autoincrement, não é necessário se preocupar com o valor, mas preencher 'default' não foi aceito
+		
 
-    def creat(self, lista_de_compras):
-        for produto in lista_de_compras:
-            comando = f"INSERT INTO compras VALUES {produto}"
-            self.cursor.execute(comando)
-            self.conexao.commit()
-        self.cursor.close()
-        self.conexao.close()
-
-    def read(self):
-        comando = "SELECT * FROM compras"
-        self.cursor.execute(comando)
-        resultado = self.cursor.fetchall()
-        self.cursor.close()
-        self.conexao.close()
-        print(resultado)
-        
-    def update(self):
-        comando = "UPDATE compras SET item = 'Fernando R S Diniz' WHERE id = '62'"
-        self.cursor.execute(comando)
-        self.conexao.commit()
-        self.cursor.close()
-        self.conexao.close()
-        
-    def delete(self):
-        comando = "DELETE FROM compras WHERE id = '62'"
-        self.cursor.execute(comando)
-        self.conexao.commit()
-        self.cursor.close()
-        self.conexao.close()
+class DataBase: #CRUD
+	def __init__(self):
+		self.connection = mysql.connector.connect(
+		host = os.environ["host"],
+		user = os.environ["user"],
+		password = os.environ["password"],
+		database = os.environ["database"])
+		self.cursor = self.connection.cursor()
+   
+	
+	def close_connection(self):
+		self.cursor.close()
+		self.connection.close()  
 
 
+	def create(self, shopping_list):
+		for product in shopping_list:
+			query = f"INSERT INTO compras VALUES {product}"
+			self.cursor.execute(query)
+			self.connection.commit()
+		
+
+	def read(self, query):
+		self.cursor.execute(query)
+		resultado = self.cursor.fetchall()
+		self.close_connection()
+		return  resultado
+		
+		
+	def update(self):
+		query = f"UPDATE compras SET item = 'Fernando R S Diniz' WHERE id = '62'"
+		self.cursor.execute(query)
+		self.connection.commit()
+		self.close_connection()
+
+		
+	def delete(self):
+		query = f"DELETE FROM compras WHERE id = '62'"
+		self.cursor.execute(query)
+		self.connection.commit()
+		self.close_connection()
 
 
-### App #########################################
+class Application:
+	def __init__(self) -> None:
+		pass
+	
+ 	
+	def insert_products_from_invoice(self, urls):
+		for url in urls:
+			invoice.create_shopping_list(url)
+		query = f"SELECT count(*) FROM compras"
+		initial_count = database.read(query)
+		database.create(invoice.shopping_list)
+		final_count = database.read(query)
+		print(f"Foram incluídos {initial_count[0][0] - final_count[0][0]} itens.")
 
-nota_fiscal = NotaFiscal()
-salvar_BD = BancoDeDados()
 
-# Preencher URLs aqui:
-urls = [""]
+	def display_registred_products(self, query):
+		products = database.read(query)
+		f = open('templates/registred_products.html')
+		page = f.read()
+		for product in products:
+			page += f"""
+				<tr>
+					<td>{product[0]}</td>
+					<td>{product[1]}</td>
+					<td>{product[2]}</td>
+					<td>{product[3]}</td>
+					<td>{product[4]}</td>
+					<td>{product[5]}</td>
+				</tr>
+			"""
+		page += """
+				</tbody>
+				</table>
+				</body>
+				</html>
+    			"""
+		return page
 
-for url in urls:
-    nota_fiscal.gerar_lista_de_compras(url)
-    
-print(nota_fiscal.lista_de_compras)
-salvar_BD.creat(nota_fiscal.lista_de_compras)
 
+invoice = Invoice()
+database = DataBase()
+application = Application()
+
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+	return render_template("index.html")
+
+@app.route('/read', methods=['POST'])
+def read_products():
+	# query = request.form['query']
+	query = f"SELECT * FROM compras"
+	page = application.display_registred_products(query)
+	return page 
+
+@app.route('/create', methods=['POST']) # https://portalsped.fazenda.mg.gov.br/portalnfce/sistema/qrcode.xhtml?p=31231171385637000434650120001654541120169211|2|1|1|818BF8A3F93CD1F95A46398B52B9CBE0FA1159F1
+def create_products():
+	urls = [request.form['url']]
+	application.insert_products_from_invoice(urls)
+	return "ok" # o problema estava no redirect!?
+
+
+
+
+
+if __name__ == "__main__":
+	app.run(host='0.0.0.0', port=1024, debug=True)
