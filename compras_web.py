@@ -2,7 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.edge.options import Options
 from time import sleep
-import mysql
+import mysql.connector
 import os
 from flask import Flask, render_template, request, redirect
 
