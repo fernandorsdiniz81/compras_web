@@ -18,7 +18,10 @@ class Invoice:
 		self.shopping_list = []
 			
 	def create_shopping_list(self, url):
-		driver = webdriver.Edge(options=self.options)
+		try:
+			driver = webdriver.Edge(options=self.options)
+		except:
+			driver = webdriver.Chrome(options=self.options)
 		driver.get(url)
 		sleep(2)
 		
