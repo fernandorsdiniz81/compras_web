@@ -2,7 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.edge.options import Options
 from time import sleep
-import mysql.connector
+from mysql import connector
 import os
 from flask import Flask, render_template, request, redirect
 
@@ -47,7 +47,7 @@ class Invoice:
 
 class DataBase: #CRUD
 	def __init__(self):
-		self.connection = mysql.connector.connect(
+		self.connection = connector.connect(
 		host = os.environ["host"],
 		user = os.environ["user"],
 		password = os.environ["password"],
