@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compras Web</title>
+    <link href="static/style.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+
+    <h2>Compras Web</h2>
+
+    
+    <form method = "post" action = "/create">
+        <p>Insira o URL da nota fiscal a ser cadastrada: <input type="text" name="url" required> </p>
+        <button type="submit">cadastrar</button>
+    </form>
+    <hr>
+    <form method = "post" action = "/read">
+        <p>Listar os produtos cadastrados: <input type="text" name="query" placeholder="todos"> </p>
+        <button type="submit">listar</button>
+    </form>
+
+    
+</body>
+</html>
