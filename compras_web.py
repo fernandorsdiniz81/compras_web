@@ -8,8 +8,8 @@ from flask import Flask, render_template, request, redirect
 from bs4 import BeautifulSoup as bs
 import requests
 
-# from dotenv import load_dotenv
-# load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()
 
 # class SeleniumScraping:
 # 	def __init__(self):
@@ -165,7 +165,8 @@ class Application:
 
 
 	def display_registred_products(self, condition):
-		query = f"SELECT * FROM compras WHERE produto LIKE '{condition[0]}' OR produto LIKE '{condition[1]}'"
+		# query = f"SELECT * FROM compras WHERE produto LIKE '{condition[0]}' OR produto LIKE '{condition[1]}'"
+		query = f"SELECT * FROM compras;"
 		print(condition) ########### teste ############
 		print(query)
 		products = database.read(query)
@@ -229,8 +230,7 @@ def index():
 @app.route('/read', methods=['POST'])
 def read_products():
 	condition = request.form['condition']
-	condition = application.format_condition(condition)
-
+	# condition = application.format_condition(condition)
 	page = application.display_registred_products(condition)
 	return page 
 
