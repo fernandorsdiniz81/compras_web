@@ -84,7 +84,8 @@ class DataBase: #CRUD
 		
 
 	def read(self, query):
-		self.cursor.execute(query)
+		# self.cursor.execute(query)
+		self.cursor.execute(SELECT * FROM compras)
 		resultado = self.cursor.fetchall()
 		# self.close_connection()
 		return  resultado
