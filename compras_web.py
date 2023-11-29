@@ -160,7 +160,7 @@ class Application:
 		initial_count = database.read(query)
 		database.create(invoice.shopping_list)
 		final_count = database.read(query)
-		print(f"Foram incluídos {initial_count[0][0] - final_count[0][0]} items.")
+		self.amount_of_inserts = f"Foram incluídos {final_count[0][0] - initial_count[0][0]} items."
 		# database.close_connection()	
 
 
@@ -229,7 +229,7 @@ def index():
 
 @app.route('/read', methods=['POST'])
 def read_products():
-	condition = request.form['condicao']
+	condition = request.form['condition']
 	condition = application.format_condition(condition)
 
 	page = application.display_registred_products(condition)
@@ -239,7 +239,7 @@ def read_products():
 def create_products():
 	urls = [request.form['url']]
 	application.insert_products_from_invoice(urls)
-	return "ok" # o problema estava no redirect!?
+	return f"{application.amount_of_inserts}" # o problema estava no redirect!?
 
 
 
