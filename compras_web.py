@@ -122,8 +122,6 @@ class Application:
 
 	def display_registred_products(self, condition):
 		query = f"SELECT * FROM compras WHERE produto LIKE '{condition[0]}' OR produto LIKE '{condition[1]}'"
-		print(condition) ########### teste ############
-		print(query)
 		products = database.read(query)
 		# database.close_connection()
 		f = open('templates/registred_products.html')
