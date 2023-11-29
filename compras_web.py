@@ -8,8 +8,8 @@ from flask import Flask, render_template, request, redirect
 from bs4 import BeautifulSoup as bs
 import requests
 
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 # class SeleniumScraping:
 # 	def __init__(self):
