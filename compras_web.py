@@ -165,8 +165,7 @@ class Application:
 
 
 	def display_registred_products(self, condition):
-		# query = f"SELECT * FROM compras WHERE produto LIKE '{condition[0]}' OR produto LIKE '{condition[1]}'"
-		query = f"SELECT * FROM compras;"
+		query = f"SELECT * FROM compras WHERE produto LIKE '{condition[0]}' OR produto LIKE '{condition[1]}'"
 		print(condition) ########### teste ############
 		print(query)
 		products = database.read(query)
@@ -193,6 +192,7 @@ class Application:
 		return page
 
 	
+
 	def format_condition(self, condition):
 		vowels = ["a", "e", "i", "o", "u"]
 		condition_without_vowel = ""
@@ -229,8 +229,9 @@ def index():
 
 @app.route('/read', methods=['POST'])
 def read_products():
-	condition = request.form['condition']
-	# condition = application.format_condition(condition)
+	condition = request.form['condicao']
+	condition = application.format_condition(condition)
+
 	page = application.display_registred_products(condition)
 	return page 
 
