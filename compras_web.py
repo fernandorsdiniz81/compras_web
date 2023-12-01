@@ -1,54 +1,10 @@
-# from selenium import webdriver
-# from selenium.webdriver.common.by import By
-# from selenium.webdriver.edge.options import Options
 from time import sleep
 import mysql.connector
 import os
 from flask import Flask, render_template, request, redirect
 from bs4 import BeautifulSoup as bs
 import requests
-
-# from dotenv import load_dotenv
-# load_dotenv()
-
-# class SeleniumScraping:
-# 	def __init__(self):
-# 		self.options = Options()
-# 		self.options.page_load_strategy = 'normal'
-# 		self.options.add_argument("--blink-settings=imagesEnabled=false") # no images loaded
-# 		self.options.add_argument("--headless") # browser is invisible
-# 		self.shopping_list = []
-			
-# 	def create_shopping_list(self, url):
-# 		try:
-# 			driver = webdriver.Edge(options=self.options)
-# 		except:
-# 			driver = webdriver.Chrome(options=self.options)
-# 		driver.get(url)
-# 		sleep(2)
-		
-# 		item_xpath = '//tbody[@id="myTable"]/tr/td[1]/h7'
-# 		amount_xpath = '//tbody[@id="myTable"]/tr/td[2]'
-# 		price_xpath = '//tbody[@id="myTable"]/tr/td[4]'
-# 		shopping_date_xpath = '//div[@id="collapse4"]/table[3]/tbody/tr/td[4]'
-# 		supermarket_xpath = '//div[@id="formPrincipal:content-template-consulta"]/div[1]/table[1]/thead/tr[2]/th/h4/b'
-		
-# 		items = driver.find_elements(By.XPATH, item_xpath)
-# 		amounts = driver.find_elements(By.XPATH, amount_xpath)
-# 		prices = driver.find_elements(By.XPATH, price_xpath)
-# 		supermarket = driver.find_element(By.XPATH, supermarket_xpath)
-		
-# 		driver.find_element(By.XPATH, '//div[@id="heading3"]/h4').click()
-# 		sleep(0.5)
-# 		shopping_date = driver.find_element(By.XPATH, shopping_date_xpath)
-# 		shopping_date = shopping_date.text[:10].split("/")
-# 		shopping_date = ("/").join(reversed(shopping_date))
-		
-# 		for item, amount, price in zip(items, amounts, prices):
-# 			registry = (0, item.text.strip(), amount.text[20:].strip(), price.text[18:].strip().replace(',','.'), supermarket.text.strip(), shopping_date)
-# 			self.shopping_list.append(registry)
-# 			# como id é autoincrement, não é necessário se preocupar com o valor, mas preencher 'default' não foi aceito
-		
+	
 
 class BeatifulSoupScraping:
 	def __init__(self) -> None:
@@ -110,7 +66,8 @@ class DataBase: #CRUD
 		host = os.environ["host"],
 		user = os.environ["user"],
 		password = os.environ["password"],
-		database = os.environ["database"])
+		database = os.environ["database"],
+		connection_timeout=120)
 		self.cursor = self.connection.cursor()
    
 	
