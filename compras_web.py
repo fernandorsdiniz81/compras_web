@@ -4,7 +4,8 @@ import os
 from flask import Flask, render_template, request, redirect
 from bs4 import BeautifulSoup as bs
 import requests
-	
+import time
+
 
 class BeatifulSoupScraping:
 	def __init__(self) -> None:
@@ -67,7 +68,7 @@ class DataBase: #CRUD
 		user = os.environ["user"],
 		password = os.environ["password"],
 		database = os.environ["database"],
-		connection_timeout=120)
+  		connection_timeout=120)
 		self.cursor = self.connection.cursor()
    
 	
@@ -85,10 +86,10 @@ class DataBase: #CRUD
 		
 
 	def read(self, query):
-		self.cursor.execute(query)
-		resultado = self.cursor.fetchall()
-		# self.close_connection()
-		return  resultado
+			self.cursor.execute(query)
+			resultado = self.cursor.fetchall()
+			# self.close_connection()
+			return  resultado
 		
 		
 	def update(self):
@@ -111,20 +112,20 @@ class Application:
 	
  	
 	def insert_products_from_invoice(self, urls):
-		for url in urls:
-			invoice.create_shopping_list(url)
+		initial_time = time.time()
 		query = "SELECT count(*) FROM compras"
 		initial_count = database.read(query)
-		database.create(invoice.shopping_list)
+		for url in urls:
+			invoice.create_shopping_list(url)
+			database.create(invoice.shopping_list)
 		final_count = database.read(query)
-		self.amount_of_inserts = f"Foram incluídos {final_count[0][0] - initial_count[0][0]} items."
+		final_time = time.time()
+		self.amount_of_inserts = f"Foram incluídos {final_count[0][0] - initial_count[0][0]} itens em {round(final_time - initial_time)} segundos."
 		# database.close_connection()	
 
 
 	def display_registred_products(self, condition):
 		query = f"SELECT * FROM compras WHERE produto LIKE '{condition[0]}' OR produto LIKE '{condition[1]}'"
-		print(condition) ########### teste ############
-		print(query)
 		products = database.read(query)
 		# database.close_connection()
 		f = open('templates/registred_products.html')
@@ -171,8 +172,6 @@ class Application:
 		return condition, condition_without_vowel		
 
 
-
-# invoice = SeleniumScraping()
 invoice = BeatifulSoupScraping()
 database = DataBase()
 application = Application()
@@ -192,9 +191,10 @@ def read_products():
 	page = application.display_registred_products(condition)
 	return page 
 
-@app.route('/create', methods=['POST']) # https://portalsped.fazenda.mg.gov.br/portalnfce/sistema/qrcode.xhtml?p=31231171385637001082650130001610761133193289|2|1|1|B97922C625E7F691F49DEB150665888398C3B6C3
+@app.route('/create', methods=['POST'])
 def create_products():
-	urls = [request.form['url']]
+	urls = request.form['url']
+	urls = urls.split(",")
 	application.insert_products_from_invoice(urls)
 	return f"{application.amount_of_inserts}" # o problema estava no redirect!?
 
