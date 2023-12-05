@@ -1,110 +1,10 @@
 from time import sleep
-import mysql.connector
-import os
 from flask import Flask, render_template, request, redirect
-from bs4 import BeautifulSoup as bs
-import requests
 import time
-
-
-class BeatifulSoupScraping:
-	def __init__(self) -> None:
-		self.shopping_list = []
-	def create_shopping_list(self, url):
-		try:
-			response = requests.get(url)
-			page = response.text
-			self.soup = bs(page, "html.parser")
-		except:
-			return response.status_code	
-		self.shopping_list = []
-		table = self.soup.find_all("td")
-		for td in table:
-			h7 = td.find("h7") # O nome do item fica em um h7 dentro de um td, demais info em um td
-			if h7 != None:
-				h7 =str(h7)
-				h7 = h7[4:-5].strip()
-				self.shopping_list.append(h7)
-			else:
-				self.shopping_list.append(td.text.strip())
-		# Neste ponto, as tags td ainda estão sequenciais, sem separação por item, quantidade e preço.
-  		# O primeiro produto está na td2, o primeiro quantidade na td3 e o primeiro preço na td5.
-		# O ciclo se repete a cada 4 tags td.
-		# O último td referente ao preço do último produto está a 19 tags td do final para o início.
-		
-		items = []
-		for i, td in zip(range(2, len(self.shopping_list)-19, 4), self.shopping_list):
-			items.append(self.shopping_list[i])
-
-		amounts = []
-		for i, td in zip(range(3, len(self.shopping_list)-19, 4), self.shopping_list):
-			amount = (self.shopping_list[i])[20:]
-			amounts.append(amount)
-
-		prices = []
-		for i, td in zip(range(5, len(self.shopping_list)-19, 4), self.shopping_list):
-			price = (self.shopping_list[i])[18:].strip().replace(',','.')
-			prices.append(price)
-
-		supermarket = self.shopping_list[-15]
-
-		shopping_date = self.shopping_list[-5]
-		shopping_date = shopping_date[:10].split("/")
-		shopping_date = ("/").join(reversed(shopping_date))
-
-		self.shopping_list = []
-		for item, amount, price in zip(items, amounts, prices):
-			registry = (0, item, amount, price, supermarket, shopping_date)
-			self.shopping_list.append(registry)
-			# como id é autoincrement, não é necessário se preocupar com o valor, mas preencher 'default' não foi aceito
-
-		return self.shopping_list
-	
-
-class DataBase: #CRUD
-	def __init__(self):
-		self.connection = mysql.connector.connect(
-		host = os.environ["host"],
-		user = os.environ["user"],
-		password = os.environ["password"],
-		database = os.environ["database"],
-  		connection_timeout=120)
-		self.cursor = self.connection.cursor()
-   
-	
-	def close_connection(self):
-		pass
-		# self.cursor.close()
-		# self.connection.close()  
-
-
-	def create(self, shopping_list):
-		for product in shopping_list:
-			query = f"INSERT INTO compras VALUES {product}"
-			self.cursor.execute(query)
-			self.connection.commit()
-		
-
-	def read(self, query):
-			self.cursor.execute(query)
-			resultado = self.cursor.fetchall()
-			# self.close_connection()
-			return  resultado
-		
-		
-	def update(self):
-		query = f"UPDATE compras SET item = 'Fernando R S Diniz' WHERE id = '62'"
-		self.cursor.execute(query)
-		self.connection.commit()
-		# self.close_connection()
-
-		
-	def delete(self):
-		query = f"DELETE FROM compras WHERE id = '62'"
-		self.cursor.execute(query)
-		self.connection.commit()
-		# self.close_connection()
-
+import database_access
+import scraping_script
+from dotenv import load_dotenv
+load_dotenv()
 
 class Application:
 	def __init__(self) -> None:
@@ -121,13 +21,11 @@ class Application:
 		final_count = database.read(query)
 		final_time = time.time()
 		self.amount_of_inserts = f"Foram incluídos {final_count[0][0] - initial_count[0][0]} itens em {round(final_time - initial_time)} segundos."
-		# database.close_connection()	
 
 
 	def display_registred_products(self, condition):
-		query = f"SELECT * FROM compras WHERE produto LIKE '{condition[0]}' OR produto LIKE '{condition[1]}' ORDER BY id DESC"
+		query = f"SELECT * FROM compras WHERE produto LIKE '{condition[0]}' OR produto LIKE '{condition[1]}' ORDER BY dia DESC"
 		products = database.read(query)
-		# database.close_connection()
 		f = open('templates/registred_products.html')
 		page = f.read()
 		for product in products:
@@ -149,7 +47,6 @@ class Application:
     			"""
 		return page
 
-	
 
 	def format_condition(self, condition):
 		vowels = ["a", "e", "i", "o", "u"]
@@ -172,8 +69,8 @@ class Application:
 		return condition, condition_without_vowel		
 
 
-invoice = BeatifulSoupScraping()
-database = DataBase()
+invoice = scraping_script.BeatifulSoupScraping()
+database = database_access.DataBase()
 application = Application()
 
 
