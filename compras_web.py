@@ -3,8 +3,8 @@ from flask import Flask, render_template, request, redirect
 import time
 import database_access
 import scraping_script
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 class Application:
 	def __init__(self) -> None:
