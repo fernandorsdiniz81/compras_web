@@ -1,24 +1,28 @@
 html, body {
   height: 100%;
   width: 100%;
-  background-color: rgb(52, 56, 75);
+  background-color: #34384b;
   font-size: 20px;
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
   color: #0f0f0f;
 }
+
 h2 {
   color: aqua;
 }
+
 a {
   font-size: 14px;
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-  color: #ebe5e5
+  color: #ebe5e5;
 }
+
 p {
   font-size: 18px;
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-  color: #ebe5e5
+  color: #ebe5e5;
 }
+
 button {
   height: 40px;
   width: 80px;
@@ -26,14 +30,16 @@ button {
   font-weight: bold;
   background-color: #8d8f96;
 }
+
 table {
-width: 100%;
+  width: auto;
 }
+
 td {
-  font-size: 18px;
+  font-size: 16px;
 }
 
 a {
   font-size: 14px;
-  color: #000000
+  color: #000000;
 }
